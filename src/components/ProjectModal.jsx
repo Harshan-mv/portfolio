@@ -1,13 +1,48 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
+import { trackEvent } from "../analytics/analytics";
 
 export default function ProjectModal({ project, onClose }) {
   if (!project) return null;
 
+  // Prevent duplicate analytics events
+  const openedRef = useRef(false);
+  const closedRef = useRef(false);
+
+  /* ----------------------------------------
+     Track modal open (deep engagement)
+     Fired exactly once per open
+  ---------------------------------------- */
+  useEffect(() => {
+    if (!openedRef.current) {
+      openedRef.current = true;
+
+      trackEvent("project_modal_open", {
+        project_title: project.title
+      });
+    }
+  }, [project]);
+
+  /* ----------------------------------------
+     Handle modal close (exit signal)
+     Fired exactly once
+  ---------------------------------------- */
+  const handleClose = () => {
+    if (!closedRef.current) {
+      closedRef.current = true;
+
+      trackEvent("project_modal_close", {
+        project_title: project.title
+      });
+    }
+
+    onClose();
+  };
+
   return (
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-[999] px-4"
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className="bg-white rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-2xl relative p-8"
@@ -15,7 +50,7 @@ export default function ProjectModal({ project, onClose }) {
       >
         {/* Close button */}
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-4 right-4 text-slate-500 hover:text-slate-800"
         >
           <X size={24} />
@@ -29,13 +64,19 @@ export default function ProjectModal({ project, onClose }) {
         {/* Short description */}
         <p className="text-slate-700 mb-4">{project.description}</p>
 
-        {/* 🎯 TOP LINKS (NEW LOCATION) */}
+        {/* Top Links */}
         {(project.github || project.live) && (
           <div className="flex gap-4 mb-8">
             {project.github && (
               <a
                 href={project.github}
                 target="_blank"
+                onClick={() =>
+                  trackEvent("project_external_click", {
+                    project_title: project.title,
+                    destination: "github"
+                  })
+                }
                 className="px-5 py-2 bg-slate-900 text-white rounded-full text-sm font-semibold hover:bg-slate-700 transition"
               >
                 GitHub Repo
@@ -46,6 +87,12 @@ export default function ProjectModal({ project, onClose }) {
               <a
                 href={project.live}
                 target="_blank"
+                onClick={() =>
+                  trackEvent("project_external_click", {
+                    project_title: project.title,
+                    destination: "live_demo"
+                  })
+                }
                 className="px-5 py-2 bg-primary text-white rounded-full text-sm font-semibold hover:bg-primary/90 transition"
               >
                 Live Demo
@@ -136,7 +183,6 @@ export default function ProjectModal({ project, onClose }) {
             </div>
           </>
         )}
-
       </div>
     </div>
   );

@@ -1,16 +1,29 @@
-import React from 'react';
-import { ArrowRight, Github, Linkedin, Mail, Download } from 'lucide-react';
-import { PERSONAL_DETAILS } from '../constants';
+import React, { useEffect } from "react";
+import { ArrowRight, Github, Linkedin, Mail, Download } from "lucide-react";
+import { PERSONAL_DETAILS } from "../constants";
 import SkillSphere from "./SkillSphere";
+import { trackEvent } from "../analytics/analytics";
 
 const Hero = () => {
+
+  /* ------------------------------------
+     Track hero section exposure
+  ------------------------------------ */
+  useEffect(() => {
+    trackEvent("section_view", {
+      section: "hero"
+    });
+  }, []);
+
   return (
-    <section id="hero" className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+    <section
+      id="hero"
+      className="relative min-h-screen flex items-center pt-20 overflow-hidden"
+    >
       <div className="container mx-auto px-6 relative z-10">
-        
         <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-10">
 
-          {/* LEFT - Text (2/3 area) */}
+          {/* LEFT - Text */}
           <div className="md:col-span-2">
             <div className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full font-medium text-sm mb-6">
               👋 Hello, I'm
@@ -29,36 +42,85 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <a href="#projects" className="px-8 py-3 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition flex items-center shadow-lg">
-                View My Work <ArrowRight className="ml-2 w-4 h-4" />
+
+              {/* Primary CTA (FUNNEL ENTRY ONLY) */}
+              <a
+                href="#projects"
+                onClick={() =>
+                  trackEvent("cta_click", {
+                    cta: "hero_primary",
+                    destination: "projects_section"
+                  })
+                }
+                className="px-8 py-3 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition flex items-center shadow-lg"
+              >
+                View My Work
+                <ArrowRight className="ml-2 w-4 h-4" />
               </a>
 
-              <a 
+              {/* Resume download */}
+              <a
                 href="/resume.pdf"
                 download
+                onClick={() =>
+                  trackEvent("resume_download", {
+                    source: "hero"
+                  })
+                }
                 className="px-8 py-3 bg-white text-slate-900 border border-slate-200 rounded-full font-medium hover:bg-slate-50 transition flex items-center shadow-sm"
               >
-                Download Resume 
+                Download Resume
                 <Download className="ml-2 w-4 h-4" />
               </a>
 
+              {/* Social links */}
               <div className="flex items-center gap-4 ml-2">
-                <a href={PERSONAL_DETAILS.github} target="_blank" className="p-3 bg-white border border-slate-200 rounded-full text-slate-600 hover:text-primary">
+                <a
+                  href={PERSONAL_DETAILS.github}
+                  target="_blank"
+                  onClick={() =>
+                    trackEvent("external_link_click", {
+                      platform: "github",
+                      source: "hero"
+                    })
+                  }
+                  className="p-3 bg-white border border-slate-200 rounded-full text-slate-600 hover:text-primary"
+                >
                   <Github className="w-5 h-5" />
                 </a>
-                <a href={PERSONAL_DETAILS.linkedin} target="_blank" className="p-3 bg-white border border-slate-200 rounded-full text-slate-600 hover:text-primary">
+
+                <a
+                  href={PERSONAL_DETAILS.linkedin}
+                  target="_blank"
+                  onClick={() =>
+                    trackEvent("external_link_click", {
+                      platform: "linkedin",
+                      source: "hero"
+                    })
+                  }
+                  className="p-3 bg-white border border-slate-200 rounded-full text-slate-600 hover:text-primary"
+                >
                   <Linkedin className="w-5 h-5" />
                 </a>
-                <a href={`mailto:${PERSONAL_DETAILS.emails[0]}`} className="p-3 bg-white border border-slate-200 rounded-full text-slate-600 hover:text-primary">
+
+                <a
+                  href={`mailto:${PERSONAL_DETAILS.emails[0]}`}
+                  onClick={() =>
+                    trackEvent("contact_click", {
+                      method: "email",
+                      source: "hero"
+                    })
+                  }
+                  className="p-3 bg-white border border-slate-200 rounded-full text-slate-600 hover:text-primary"
+                >
                   <Mail className="w-5 h-5" />
                 </a>
               </div>
             </div>
           </div>
 
-          {/* RIGHT SIDE — Skill Sphere (1/3 area) */}
+          {/* RIGHT SIDE */}
           <div className="w-full max-w-[480px] h-[420px]">
-
             <SkillSphere />
           </div>
 
